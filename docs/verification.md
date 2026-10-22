@@ -43,5 +43,4 @@ This is not a complete cross-browser/accessibility audit. Mobile-editor support 
 - Local preview returned HTTP 200; the browser interactions above used the real app.
 - Bundle includes only the Python/C++/Java grammars and the generic editor worker. The normal large Monaco chunk warning remains; no production-performance benchmark is claimed.
 - Temporary responsive viewport overrides were reset after testing.
-- Project files were moved from the original OneDrive project folder into `E:\CodeTogether`. The older destination plan was retained as `plan.original-2026-10-20.md`; the two pre-existing videos were left untouched and excluded from Git tracking patterns.
-- No remote site publication or GitHub push was performed.
+- This record covers local frontend verification; it does not assert a hosted application deployment.

@@ -9,8 +9,21 @@ coverage/
 .DS_Store
 Thumbs.db
 /work/
-/plan.original-*.md
 /*.mp4
 /*.mov
 /*.zip
 
+# Local working documents
+/AGENTS.md
+.[Pp][Ll][Aa][Nn][Nn][Ii][Nn][Gg]/
+[Pp][Ll][Aa][Nn][Nn][Ii][Nn][Gg]/
+[Pp][Ll][Aa][Nn][Ss]/
+[Rr][Oo][Aa][Dd][Mm][Aa][Pp][Ss]/
+*[Pp][Ll][Aa][Nn]*.[Mm][Dd]*
+*[Pp][Ll][Aa][Nn]*.[Tt][Xx][Tt]
+*[Pp][Ll][Aa][Nn]*.[Pp][Dd][Ff]
+*[Pp][Ll][Aa][Nn]*.[Dd][Oo][Cc]*
+*[Rr][Oo][Aa][Dd][Mm][Aa][Pp]*.[Mm][Dd]*
+*[Rr][Oo][Aa][Dd][Mm][Aa][Pp]*.[Tt][Xx][Tt]
+*[Rr][Oo][Aa][Dd][Mm][Aa][Pp]*.[Pp][Dd][Ff]
+*[Rr][Oo][Aa][Dd][Mm][Aa][Pp]*.[Dd][Oo][Cc]*
