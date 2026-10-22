@@ -1,0 +1,16 @@
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+*.local
+.DS_Store
+Thumbs.db
+/work/
+/plan.original-*.md
+/*.mp4
+/*.mov
+/*.zip
+

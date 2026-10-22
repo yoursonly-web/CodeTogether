@@ -1,0 +1,14 @@
+{
+  "name": "codetogether",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": ["apps/web"],
+  "scripts": {
+    "dev": "npm run dev --workspace @codetogether/web",
+    "build": "npm run build --workspace @codetogether/web",
+    "typecheck": "npm run typecheck --workspace @codetogether/web",
+    "test": "node --experimental-strip-types --test tests/model.test.mjs",
+    "preview": "npm run preview --workspace @codetogether/web"
+  },
+  "engines": {"node": ">=22.12.0"}
+}
