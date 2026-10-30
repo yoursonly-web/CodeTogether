@@ -4,7 +4,7 @@ A web-based code editor for **Python, C++, and Java**, with a Fastify/PostgreSQL
 
 **Current status:** local editing, browser draft recovery, database-backed authentication, explicit provider linking, logout, and session recovery have been verified locally. Shared editing and code execution are not connected; the Run button is disabled and result examples are labelled UI previews.
 
-## Features
+## Current features
 
 - Monaco Editor with syntax highlighting, indentation, find/replace, and local undo/redo.
 - Create, search, and switch local workspaces with independent source code and standard input.
@@ -18,6 +18,46 @@ A web-based code editor for **Python, C++, and Java**, with a Fastify/PostgreSQL
 - PostgreSQL migrations with transactions, checksums, and migration locking.
 
 Language profiles currently support **editing only**. No compiler or interpreter runs submitted code.
+
+## Planned features
+
+The following features are **not implemented yet**:
+
+| Area | Planned behaviour |
+| --- | --- |
+| Shared rooms | Two or three authenticated members work in one room, with a maximum of three members including the owner |
+| Room access | Create rooms, invite members, and enforce owner/editor permissions on the server |
+| Concurrent editing | Merge simultaneous edits with Yjs CRDTs and a Monaco binding, instead of replacing the entire document |
+| Live presence | Display connected members, named cursors, and selections |
+| Shared persistence | Store collaborative document state in PostgreSQL and show accurate saving/error feedback |
+| Reconnection | Reauthorize users and resynchronize the shared document after an interrupted connection |
+| Code execution | Execute Python, C++, and Java through an isolated server-side execution service with preset time/memory limits, bounded output, and submission quotas |
+| Real execution results | Show compilation, runtime, and resource-limit outcomes tied to the exact submitted source and input |
+| Deployment and reliability | Provide HTTPS/WSS access and evaluate authorization, failure recovery, and a measured multi-room workload |
+
+### Next phase: authorized rooms and collaborative editing
+
+Authentication and the database foundation are in place. The next implementation phase will connect them to shared workspaces:
+
+1. Add room, membership, and invitation records and APIs.
+2. Enforce access permissions and the three-member cap, including simultaneous join attempts.
+3. Connect authenticated room WebSockets to Yjs and Monaco for shared editing.
+4. Add participant presence, live cursors, and selections.
+5. Persist collaborative document state and distinguish synchronized changes from confirmed database saves.
+6. Handle refresh, reconnect, room switching, and revoked access without duplicating starter content.
+7. Validate the workflow with two and three accounts and reject unauthorized access and fourth-member admission.
+
+**Milestone:** two or three signed-in users can edit the same file, see each other's cursors, and recover saved shared content after reload. Real code execution is a separate subsequent milestone.
+
+### Later improvements
+
+- Version history, named checkpoints, and restoration.
+- Viewer permissions and more flexible room controls.
+- Multi-file workspaces and additional programming languages.
+- Larger rooms and additional collaboration servers after capacity testing.
+- Richer execution history and operational metrics.
+
+These are public development goals, not claims about the current application.
 
 ## Technology stack
 
