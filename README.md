@@ -1,149 +1,236 @@
 # CodeTogether
 
-A web-based code-editor frontend for **Python, C++, and Java**, built as a B.Tech Computer Science major project.
+A web-based code editor for **Python, C++, and Java**, with a Fastify/PostgreSQL backend and Google/GitHub sign-in.
 
-> **Current status: local frontend prototype.** Editing, workspace management, and browser draft saving work. Authentication, multi-user synchronization, server persistence, and code execution are not connected. The **Run** button is disabled, and output examples are explicitly labelled UI previews.
-
-## Preview
-
-![CodeTogether local editor with source, standard input, and result panels](docs/screenshots/workspace.png)
-
-<details>
-<summary>Workspace dashboard and narrow layout</summary>
-
-### Workspace dashboard
-
-![CodeTogether local workspace dashboard](docs/screenshots/workspaces.png)
-
-### Narrow layout
-
-![CodeTogether workspace at a narrow screen width](docs/screenshots/workspace-narrow.png)
-
-</details>
+**Current status:** local editing, browser draft recovery, database-backed authentication, explicit provider linking, logout, and session recovery have been verified locally. Shared editing and code execution are not connected; the Run button is disabled and result examples are labelled UI previews.
 
 ## Features
 
-| Area | Available features |
-| --- | --- |
-| Code editor | Monaco Editor, syntax highlighting, line numbers, indentation, find and replace, and local undo/redo |
-| Local workspaces | Create, search, and switch workspaces with independent source code and standard input |
-| Language profiles | Python with `main.py`, C++17 with `main.cpp`, and Java with `Main.java` |
-| Draft saving | Browser storage, recovery after refresh, and visible saving/error states |
-| Recovery safeguards | Validation of saved data; malformed drafts and detected changes from another tab pause saving until explicitly resolved |
-| Input and result interface | Standard input; Output, Errors, and Details tabs; labelled example execution states |
-| Source snapshots | Inspect the source and input captured for a UI example after the current editor changes |
-| Preferences | Adjustable font size, word wrap, and focus mode |
-| File actions | Copy source to the clipboard or download the active file |
-| Interface | Dark theme, responsive layout, keyboard-operable result tabs, and dialogs with focus management |
+- Monaco Editor with syntax highlighting, indentation, find/replace, and local undo/redo.
+- Create, search, and switch local workspaces with independent source code and standard input.
+- Python (`main.py`), C++17 (`main.cpp`), and Java (`Main.java`) editing profiles.
+- Browser draft saving, refresh recovery, invalid-data handling, and cross-tab change warnings.
+- Font-size preferences, word wrap, focus mode, source copy, and file download.
+- Standard input, output/error/details panels, and labelled example execution states.
+- Google and GitHub OAuth sign-in with server-managed, database-backed sessions.
+- Explicitly connect both providers to one account using the same verified email.
+- Server-side logout, protected profile access, origin checks, and request limits.
+- PostgreSQL migrations with transactions, checksums, and migration locking.
 
-Language profiles support **editing only**. No compiler or interpreter is connected. Participant and invitation controls do not connect other users.
+Language profiles currently support **editing only**. No compiler or interpreter runs submitted code.
 
 ## Technology stack
 
 | Layer | Technology |
 | --- | --- |
-| User interface | React 19 and TypeScript |
-| Build tooling | Vite 7 |
-| Code editor | Monaco Editor with `@monaco-editor/react` |
-| Styling | CSS with responsive layouts |
-| Icons | Lucide React |
-| Local persistence | Browser `localStorage` with validated draft recovery |
-| Automated checks | Node.js test runner, TypeScript, and Vite production build |
+| Frontend | React 19, TypeScript, Vite 7 |
+| Editor | Monaco Editor and @monaco-editor/react |
+| Interface | CSS and Lucide React |
+| Backend | Node.js, TypeScript, Fastify |
+| Authentication | Better Auth with Google/GitHub OAuth |
+| Database | PostgreSQL through pg |
+| Draft persistence | Browser localStorage |
+| Verification | Node.js test runner, TypeScript, production builds |
 
-Monaco and its editor worker are bundled with the application. The interface optionally requests DM Sans from Google Fonts and falls back to system fonts.
+## Requirements
 
-## Run locally
-
-### Requirements
-
-- **Node.js 22.12 or newer**. Node.js 24 was used for verification.
-- **npm**, included with Node.js.
+- Node.js **22.12 or newer** and npm. Node.js 24 was used for verification.
+- Git.
+- A running PostgreSQL instance. PostgreSQL 18.6 was used locally.
 - A modern desktop browser.
+- Google Web application OAuth credentials and GitHub OAuth application credentials for sign-in.
 
-Clone or download this repository. From its root directory, run:
+The commands below use Windows PowerShell and `npm.cmd` to avoid execution-policy issues with npm.ps1. Use `npm` where your shell supports it. The checked development environment is Windows; the API's automatic path-watching development command is intended for Windows/macOS.
 
-```sh
-npm ci
-npm run dev
-```
+## Setup
 
-Open [http://127.0.0.1:5173/](http://127.0.0.1:5173/) in your browser. The development server binds to your local machine.
-
-On Windows, if PowerShell blocks `npm.ps1`, use:
+### 1. Clone the repository and install dependencies
 
 ```powershell
+git clone https://github.com/yoursonly-web/CodeTogether.git
+cd CodeTogether
 npm.cmd ci
+```
+
+### 2. Prepare PostgreSQL
+
+Start PostgreSQL, then use an administrator connection in psql or pgAdmin to create a dedicated application role and databases. Replace the example password first:
+
+```sql
+CREATE ROLE codetogether_app LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE PASSWORD 'choose-a-local-password';
+CREATE DATABASE codetogether OWNER codetogether_app;
+CREATE DATABASE codetogether_test OWNER codetogether_app;
+```
+
+`codetogether_test` is a separate database for integration tests. The tests require its name to end in `_test` and do not fall back to the application database.
+
+On the original development computer, an initialized PostgreSQL instance exists in the ignored `.runtime` directory. Its Windows-only helpers are:
+
+```powershell
+npm.cmd run db:start
+npm.cmd run db:status
+npm.cmd run db:stop
+```
+
+Those helpers manage that existing local instance; they do not download or initialize PostgreSQL for a fresh clone. On another computer, use your PostgreSQL installation and configure its connection string below.
+
+### 3. Configure the environment
+
+Create a root `.env` from the example only if one does not already exist:
+
+```powershell
+if (-not (Test-Path -LiteralPath .env)) { Copy-Item -LiteralPath .env.example -Destination .env }
+```
+
+Fill these values in `.env`:
+
+| Variable | Value or purpose |
+| --- | --- |
+| `NODE_ENV` | `development` for local work |
+| `PORT` | `3001` |
+| `BETTER_AUTH_URL` | `http://127.0.0.1:5173` |
+| `DATABASE_URL` | `postgresql://codetogether_app:YOUR_PASSWORD@127.0.0.1:5432/codetogether` |
+| `TEST_DATABASE_URL` | `postgresql://codetogether_app:YOUR_PASSWORD@127.0.0.1:5432/codetogether_test` |
+| `BETTER_AUTH_SECRET` | A generated random secret of at least 32 characters |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Credentials from your Google OAuth client |
+| `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | Credentials from your GitHub OAuth app |
+
+Generate an authentication secret locally, then copy the result into `BETTER_AUTH_SECRET`:
+
+```powershell
+node -e "console.log(require('node:crypto').randomBytes(48).toString('base64'))"
+```
+
+URL-encode reserved characters in a database password when placing it in a connection string. Keep the authentication secret stable: changing it invalidates existing signed sessions and affects stored token decryption.
+
+`.env` is private and ignored by Git. Only the placeholder `.env.example` belongs in the repository. Do not put server secrets in `VITE_` variables.
+
+### 4. Register Google sign-in
+
+In Google Cloud Console, select or create a project, configure Google Auth Platform branding/audience, and create an OAuth client of type **Web application**:
+
+| Google setting | Local value |
+| --- | --- |
+| Authorized JavaScript origin | `http://127.0.0.1:5173` |
+| Authorized redirect URI | `http://127.0.0.1:5173/api/auth/callback/google` |
+
+Add your Google account as a test user where required by the audience/testing configuration. Put the client ID and client secret in `.env`.
+
+The integration requests basic identity information. See the [Google provider setup](https://better-auth.com/docs/authentication/google).
+
+### 5. Register GitHub sign-in
+
+Create a GitHub **OAuth application** in your developer settings. This is separate from Git's saved credentials:
+
+| GitHub setting | Local value |
+| --- | --- |
+| Application name | `CodeTogether` |
+| Homepage URL | `http://127.0.0.1:5173` |
+| Authorization callback URL | `http://127.0.0.1:5173/api/auth/callback/github` |
+
+Generate its client secret and put both credentials in `.env`. Sign-in requests profile and email access, not repository access. See the [GitHub provider setup](https://better-auth.com/docs/authentication/github).
+
+Both fields for a provider must be supplied together. Missing providers are disabled in development; production configuration requires both.
+
+### 6. Apply migrations and start the application
+
+From the repository root:
+
+```powershell
+npm.cmd run db:migrate
 npm.cmd run dev
 ```
 
-The frontend requires no database, Docker installation, OAuth credentials, or execution service.
+Open **[http://127.0.0.1:5173/](http://127.0.0.1:5173/)** in your system browser.
 
-### Try the prototype
+The development command starts both the frontend and API:
 
-1. Open the default Python playground.
-2. Edit the starter source and standard input.
-3. Create another workspace with C++ or Java.
-4. Refresh to check browser draft recovery.
-5. Use **Preview states** to inspect the sample result panels.
-6. Adjust word wrap or font size, try focus mode, and copy or download a file.
+| Service | Local address |
+| --- | --- |
+| Web app | `http://127.0.0.1:5173` |
+| API | `http://127.0.0.1:3001` |
+| PostgreSQL | `127.0.0.1:5432` with the example connection strings |
 
-The preview selector does not evaluate your program.
+Vite forwards `/api` requests to the API. Saving `.env` restarts the development API; refocus or reload the browser to refresh provider availability.
 
-## Commands and verification
+Use **127.0.0.1 consistently**. `localhost:5173` is a different authentication origin and has separate browser drafts and cookies. If sign-in is rejected at localhost, open the exact address above rather than weakening origin checks or clearing site data.
+
+For the editor alone, run `npm.cmd run dev:web`. Editing remains usable without the API, but account access is unavailable. No Docker installation or execution service is required for this milestone.
+
+## Check authentication
+
+1. Choose **Sign in → Continue with Google** and complete account selection/consent.
+2. Confirm your profile appears.
+3. If GitHub uses the same verified email, choose **Connect GitHub** from the account dialog. Linking also requires a sign-in within the last ten minutes.
+4. Confirm both providers appear as connected.
+5. Sign out, sign back in with GitHub, and refresh to check session recovery.
+
+Providers are never silently merged because their emails match. Different-email identities remain separate accounts; test them by signing out before using the other provider.
+
+Sessions are database-backed with a seven-day expiry. Cookies are HttpOnly and use SameSite protections; HTTPS configuration enables secure cookies. Stored OAuth access/refresh tokens are encrypted, identity tokens are discarded after callback verification, and profile responses do not expose credentials.
+
+Signing in **does not upload browser drafts or attach them to an account**. Other people using the same browser profile can access those local drafts.
+
+## Commands
 
 | Command | Purpose |
 | --- | --- |
-| `npm run dev` | Start the frontend development server |
-| `npm test` | Run the draft validation/recovery tests |
-| `npm run typecheck` | Check TypeScript |
-| `npm run build` | Type-check and build into `apps/web/dist` |
-| `npm run preview` | Serve the production build locally, normally on port 4173 |
+| `npm run dev` | Start the frontend and API |
+| `npm run dev:web` | Start only the frontend |
+| `npm run dev:api` | Start only the development API |
+| `npm run db:migrate` | Apply pending versioned migrations without resetting the database |
+| `npm test` | Run frontend-model and backend unit tests |
+| `npm run test:integration` | Run PostgreSQL integration tests against TEST_DATABASE_URL |
+| `npm run typecheck` | Check frontend and backend TypeScript |
+| `npm run build` | Build the frontend and backend, including migration SQL |
+| `npm run preview` | Preview the static frontend build, normally on port 4173 |
 
-The frontend was verified on **22 October 2026**: eight model tests passed, TypeScript and the production build passed, and manual browser checks covered editing, recovery, navigation, sample results, dialogs, and responsive layouts.
+Build output is in `apps/web/dist` and `apps/api/dist`. Vite preview is a static frontend preview, not a full-stack deployment server. Production requires an HTTPS application origin, matching provider callbacks, and a reverse proxy routing `/api` to the backend.
 
-The build reports a large Monaco bundle warning. These checks do not establish production performance, complete browser/accessibility coverage, collaboration correctness, or execution security.
+## Health checks
 
-See [verification notes](docs/verification.md) for the checks and their limits.
+| Endpoint | Expected behaviour |
+| --- | --- |
+| `GET /api/health` | Confirms the API responds |
+| `GET /api/ready` | Confirms database connectivity; returns 503 when unavailable |
+| `GET /api/auth/providers` | Reports configured providers without revealing credentials |
+| `GET /api/me` | Returns the signed-in profile; returns 401 when signed out |
+
+## Verification
+
+Verified locally on **30 October 2026**:
+
+- Eight frontend-model tests and six backend unit tests passed.
+- Thirteen PostgreSQL integration scenarios passed.
+- TypeScript checks and both production builds passed.
+- The owner confirmed real Google login, GitHub linking, logout, independent GitHub re-login, and refresh recovery in their system browser.
+- Database and safe request-log checks confirmed linked identities, active sessions, and zero retained identity tokens.
+
+Automated provider exchanges use simulated responses. Live browser outcomes are reported by the owner and checked against database/server evidence. The existing large Monaco bundle warning remains.
+
+More detail: [backend setup](docs/backend-setup.md), [authentication verification](docs/auth-verification.md), and [frontend verification](docs/verification.md).
 
 ## Project structure
 
 ```text
-CodeTogether/
-├── apps/
-│   └── web/
-│       ├── public/
-│       ├── src/
-│       │   ├── components/
-│       │   │   ├── Dialog.tsx
-│       │   │   └── WorkspaceEditor.tsx
-│       │   ├── App.tsx
-│       │   ├── main.tsx
-│       │   ├── model.ts
-│       │   └── styles.css
-│       ├── package.json
-│       └── vite.config.ts
-├── docs/
-│   ├── screenshots/
-│   └── verification.md
-├── tests/
-│   └── model.test.mjs
-├── .gitignore
-├── package-lock.json
-├── package.json
-└── README.md
+apps/web/        React interface, Monaco, browser drafts, and account controls
+apps/api/        Fastify API, authentication, SQL migrations, and backend tests
+tests/           Frontend data-model tests
+scripts/         Local database helpers
+docs/            Setup and verification documentation
+.env.example     Placeholder-only configuration template
 ```
 
-## Local data and limitations
+## Current limitations
 
-- Drafts and preferences use the `codetogether.local.v1` browser storage key. Another browser, profile, or origin has separate data.
-- Clearing site data removes drafts. Download important files as an independent copy.
-- Use one active editing tab. External storage changes pause saving; the prototype does not merge edits across tabs or devices.
-- Each source file is limited to **64 KiB** and standard input to **16 KiB**, measured in UTF-8 bytes.
-- Up to **12 local workspaces** are supported.
-- The layout adapts to narrow screens, but a desktop browser is the intended coding environment.
-- Browser storage provides neither server persistence nor account authentication.
-- No submitted code is executed.
+- Source files are limited to 64 KiB and standard input to 16 KiB, measured in UTF-8 bytes.
+- Up to 12 browser-local workspaces are supported.
+- Browser drafts do not synchronize between accounts, devices, or tabs.
+- Shared rooms, live cursors, and collaborative editing are not connected.
+- No submitted code is compiled or executed.
+- Desktop browsers are the intended coding environment; a responsive layout does not establish full mobile-editor support.
+- Local verification does not establish production deployment, complete accessibility coverage, or production-scale performance.
 
 ## License
 
-A project license has not been selected. This repository does not currently claim an MIT or other open-source license. Dependencies retain their respective licenses.
+No project license has been selected. Third-party dependencies retain their respective licenses.

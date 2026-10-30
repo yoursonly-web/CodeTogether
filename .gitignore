@@ -27,3 +27,7 @@ Thumbs.db
 *[Rr][Oo][Aa][Dd][Mm][Aa][Pp]*.[Tt][Xx][Tt]
 *[Rr][Oo][Aa][Dd][Mm][Aa][Pp]*.[Pp][Dd][Ff]
 *[Rr][Oo][Aa][Dd][Mm][Aa][Pp]*.[Dd][Oo][Cc]*
+
+# Local database binaries, data, credentials and logs
+/.runtime/
+*.log

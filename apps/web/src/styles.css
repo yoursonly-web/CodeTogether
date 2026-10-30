@@ -408,3 +408,34 @@ kbd { font: 9px/18px var(--mono); color: #a4b4c3; padding: 0 5px; border: 1px so
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation-duration: .001ms !important; animation-iteration-count: 1 !important; }
 }
+
+/* Account access */
+.account-header-button { min-height: 31px; border: 1px solid #365046; border-radius: 7px; background: #20312b; color: #b6e4cf; padding: 4px 12px; font-size: 11px; display: flex; align-items: center; }
+.account-header-button .avatar { width: 26px; height: 26px; margin: -2px -7px; }
+.account-loading { display: flex; gap: 10px; align-items: center; padding: 24px 0; color: #adbdc6; }
+.social-buttons { display: grid; gap: 11px; margin: 20px 0; }
+.social-button { width: 100%; background: #222b36; border: 1px solid #3c4958; color: #e0e7ed; min-height: 46px; font-size: 12px; justify-content: center; }
+.social-button:hover:not(:disabled) { background: #2c3943; border-color: #8bbaa5; }
+.social-button:disabled { opacity: .5; cursor: not-allowed; }
+.social-button small { margin-left: auto; font-size: 9px; color: #99a6b2; }
+.google-letter { font-family: Arial, sans-serif; font-size: 20px; font-weight: 700; width: 19px; text-align: center; }
+.account-message { padding: 11px 13px; border: 1px solid #446c59; background: #203b2e; border-radius: 7px; font-size: 11px; line-height: 19px; color: #b6dbc7; margin: 18px 0; }
+.account-message.error { border-color: #80534c; background: #3b2728; color: #efbdb2; }
+.account-verified { display: flex; gap: 7px; align-items: center; color: #a6cbb8; font-size: 11px; }
+.account-providers { border-top: 1px solid #303b44; margin-top: 22px; padding-top: 16px; }
+.account-providers h3 { font-size: 12px; font-weight: 500; color: #cbd5dd; }
+.provider-row { display: flex; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid #303945; }
+.provider-row > div { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 0; }
+.provider-row strong { color: #d0d8df; font-size: 12px; }
+.provider-row small { color: #8a9aa6; font-size: 10px; }
+.provider-icon { width: 29px; display: flex; justify-content: center; }
+.provider-row .button { padding: 7px 10px; min-height: 31px; font-size: 10px; }
+.provider-row .button:disabled, .signout-button:disabled { opacity: .5; cursor: not-allowed; }
+.provider-connected { font-size: 10px; color: #a6d7bd; }
+.account-draft-note { margin-top: 24px; }
+.account-draft-note svg { flex-shrink: 0; margin-top: 2px; }
+.signout-button { margin-top: 16px; }
+.local-profile strong { max-width: 135px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+.profile-summary > div { min-width: 0; }
+.profile-summary p { overflow-wrap: anywhere; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }

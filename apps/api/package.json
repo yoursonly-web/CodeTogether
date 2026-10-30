@@ -1,0 +1,28 @@
+{
+  "name": "@codetogether/api",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --env-file-if-exists=../../.env --import tsx --watch --watch-path=src --watch-path=../../.env src/server.ts",
+    "start": "node --env-file-if-exists=../../.env dist/server.js",
+    "build": "tsc -p tsconfig.json && node scripts/copy-migrations.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "node --import tsx --test tests/unit.test.ts",
+    "test:integration": "node --env-file-if-exists=../../.env --import tsx --test tests/integration.test.ts",
+    "db:migrate": "node --env-file-if-exists=../../.env --import tsx src/db/migrate.ts",
+    "db:generate": "node --env-file-if-exists=../../.env --import tsx src/db/generate.ts"
+  },
+  "dependencies": {
+    "@fastify/rate-limit": "11.2.1",
+    "better-auth": "1.7.14",
+    "fastify": "5.12.7",
+    "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/pg": "^8.15.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0"
+  }
+}

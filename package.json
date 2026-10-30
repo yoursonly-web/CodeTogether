@@ -2,13 +2,28 @@
   "name": "codetogether",
   "version": "0.1.0",
   "private": true,
-  "workspaces": ["apps/web"],
+  "workspaces": [
+    "apps/web",
+    "apps/api"
+  ],
   "scripts": {
-    "dev": "npm run dev --workspace @codetogether/web",
-    "build": "npm run build --workspace @codetogether/web",
-    "typecheck": "npm run typecheck --workspace @codetogether/web",
-    "test": "node --experimental-strip-types --test tests/model.test.mjs",
-    "preview": "npm run preview --workspace @codetogether/web"
+    "dev": "concurrently --kill-others --names web,api \"npm run dev:web\" \"npm run dev:api\"",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "node --experimental-strip-types --test tests/model.test.mjs && npm run test --workspace @codetogether/api",
+    "preview": "npm run preview --workspace @codetogether/web",
+    "dev:web": "npm run dev --workspace @codetogether/web",
+    "dev:api": "npm run dev --workspace @codetogether/api",
+    "db:migrate": "npm run db:migrate --workspace @codetogether/api",
+    "test:integration": "npm run test:integration --workspace @codetogether/api",
+    "db:start": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/local-db.ps1 start",
+    "db:stop": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/local-db.ps1 stop",
+    "db:status": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/local-db.ps1 status"
   },
-  "engines": {"node": ">=22.12.0"}
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
 }
